@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bw.dao.MessageMapper">
+    <resultMap type="message" id="rm">
+        <id column="mid" property="mid"/>
+        <result column="content" property="content"/>
+        <result column="createtime" property="createtime"/>
+        <result column="argent" property="argent"></result>
+        <association property="user" javaType="user">
+            <id column="id" property="id"/>
+            <result column="user_name" property="userName"/>
+            <result column="user_password" property="userPassword"/>
+            <result column="user_sex" property="userSex"/>
+            <result column="user_birthday" property="userBirthday"/>
+        </association>
+    </resultMap>
+    <!-- 查询所有信息 -->
+    <select id="getMessages" resultMap="rm">
+       select m.*,u.user_name from t_messge m,t_user u where m.u_id=u.id
+    </select>
+
+    <!--删除信息  -->
+    <delete id="deleteMessage" parameterType="int">
+        delete from t_messge where mid=#{id}
+    </delete>
+
+    <!--添加信息-->
+    <insert id="addMessage" parameterType="java.util.List">
+        insert into t_messge(content,createtime,argent,u_id) values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.content},#{item.createtime},#{item.argent},#{item.user.id})
+        </foreach>
+    </insert>
+
+    <!--根据id查询信息-->
+    <select id="queryById" parameterType="int" resultMap="rm">
+         select m.mid,m.createtime,m.content,u.user_name,m.argent,u.id from t_messge m ,t_user u where m.u_id=u.id and u.id=#{id}
+    </select>
+
+    <!--批量删除-->
+    <delete id="deleteByIds" parameterType="string">
+        delete from t_messge where  mid in(${value})
+    </delete>
+
+    <!--模糊查询-->
+    <select id="getMsgByName" parameterType="string" resultMap="rm">
+         select m.*,u.user_name from t_user u,t_messge m where  m.u_id=u.id and u.user_name like '%${value}%'
+    </select>
+
+</mapper>
+
